@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as duckdb from '@duckdb/duckdb-wasm';
-import duckdb_wasm from '@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url';
-import mvp_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url';
-import duckdb_wasm_eh from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url';
-import eh_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url';
 
 // Define the shape of our summary statistics
 // Marking fields as optional/nullable to handle potential NULL results from SQL aggregations
@@ -40,19 +36,18 @@ async function getDuckDB() {
 
   dbPromise = (async () => {
     try {
-      // Select a bundle based on browser checks
-      const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
+      // Use same-origin assets to avoid cross-origin Worker restrictions.
+      const localBundles: duckdb.DuckDBBundles = {
         mvp: {
-          mainModule: duckdb_wasm,
-          mainWorker: mvp_worker,
+          mainModule: '/duckdb/duckdb-mvp.wasm',
+          mainWorker: '/duckdb/duckdb-browser-mvp.worker.js',
         },
         eh: {
-          mainModule: duckdb_wasm_eh,
-          mainWorker: eh_worker,
+          mainModule: '/duckdb/duckdb-eh.wasm',
+          mainWorker: '/duckdb/duckdb-browser-eh.worker.js',
         },
       };
-
-      const bundle = await duckdb.selectBundle(MANUAL_BUNDLES);
+      const bundle = await duckdb.selectBundle(localBundles);
       const worker = new Worker(bundle.mainWorker!);
       const logger = new duckdb.ConsoleLogger();
       const db = new duckdb.AsyncDuckDB(logger, worker);
