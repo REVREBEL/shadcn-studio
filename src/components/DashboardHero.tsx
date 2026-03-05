@@ -19,18 +19,25 @@ export function DashboardHero({ hotelName, year, month }: DashboardHeroProps) {
 
   useEffect(() => {
     if (!isReady) return;
-    
+
+    let active = true;
     setIsLoading(true);
+    // Clear stale stats immediately when inputs change
+    setStats(null);
+
     getSummaryStats(hotelName, year, month)
       .then((data) => {
-        setStats(data);
+        if (active) setStats(data);
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         console.error("Failed to fetch stats", err);
+        if (active) setStats(null);
       })
       .finally(() => {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       });
+
+    return () => { active = false; };
   }, [isReady, hotelName, year, month, getSummaryStats]);
 
   if (error) {
@@ -43,12 +50,51 @@ export function DashboardHero({ hotelName, year, month }: DashboardHeroProps) {
     );
   }
 
-  // Formatters
-  const formatCurrency = (val: number | undefined) => 
-    val === undefined ? "$0" : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
-  
-  const formatPct = (val: number | undefined) => 
-    val === undefined ? "0%" : new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 1 }).format(val);
+  // Formatters with null safety
+  const formatCurrency = (val: number | null | undefined) => {
+    if (val === null || val === undefined) return "$0";
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+  };
+
+  const formatPct = (val: number | null | undefined) => {
+    if (val === null || val === undefined) return "0%";
+    return new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 1 }).format(val);
+  };
+
+  const getVarDisplay = (val: number | null | undefined) => {
+    if (val === null || val === undefined) return null;
+    const isPos = val >= 0;
+    const Icon = isPos ? TrendingUp : TrendingDown;
+    const colorClass = isPos ? "text-emerald-500 font-medium" : "text-red-500 font-medium";
+    const iconColor = isPos ? "text-emerald-500" : "text-red-500";
+
+    return (
+      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+        <Icon className={`w-3 h-3 ${iconColor}`} />
+        <span className={colorClass}>
+          {isPos ? "+" : ""}{(val * 100).toFixed(1)}%
+        </span>
+      </p>
+    );
+  };
+
+  const adrVarDisplay = (val: number | null | undefined, pyVal: number | null | undefined) => {
+    if (val === null || val === undefined) return null;
+    const isPos = val >= 0;
+    const Icon = isPos ? TrendingUp : TrendingDown;
+    const colorClass = isPos ? "text-emerald-500 font-medium" : "text-red-500 font-medium";
+    const iconColor = isPos ? "text-emerald-500" : "text-red-500";
+
+    return (
+      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+        <Icon className={`w-3 h-3 ${iconColor}`} />
+        <span className={colorClass}>
+          {isPos ? "+" : ""}{formatCurrency(val)}
+        </span>
+        {" "}from prior year ({formatCurrency(pyVal)})
+      </p>
+    );
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
@@ -64,16 +110,9 @@ export function DashboardHero({ hotelName, year, month }: DashboardHeroProps) {
           ) : stats ? (
             <>
               <div className="text-2xl font-bold">{formatPct(stats.occ_cy)}</div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                {stats.occ_var >= 0 ? (
-                  <TrendingUp className="w-3 h-3 text-emerald-500" />
-                ) : (
-                  <TrendingDown className="w-3 h-3 text-red-500" />
-                )}
-                <span className={stats.occ_var >= 0 ? "text-emerald-500 font-medium" : "text-red-500 font-medium"}>
-                  {stats.occ_var >= 0 ? "+" : ""}{(stats.occ_var * 100).toFixed(1)}%
-                </span>
-                {" "}from prior year ({formatPct(stats.occ_py)})
+              {getVarDisplay(stats.occ_var)}
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Prior Year: {formatPct(stats.occ_py)}
               </p>
             </>
           ) : (
@@ -94,17 +133,7 @@ export function DashboardHero({ hotelName, year, month }: DashboardHeroProps) {
           ) : stats ? (
             <>
               <div className="text-2xl font-bold">{formatCurrency(stats.adr_cy)}</div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                {stats.adr_var >= 0 ? (
-                  <TrendingUp className="w-3 h-3 text-emerald-500" />
-                ) : (
-                  <TrendingDown className="w-3 h-3 text-red-500" />
-                )}
-                <span className={stats.adr_var >= 0 ? "text-emerald-500 font-medium" : "text-red-500 font-medium"}>
-                  {stats.adr_var >= 0 ? "+" : ""}{formatCurrency(stats.adr_var)}
-                </span>
-                {" "}from prior year ({formatCurrency(stats.adr_py)})
-              </p>
+              {adrVarDisplay(stats.adr_var, stats.adr_py)}
             </>
           ) : (
             <div className="text-2xl font-bold">-</div>
@@ -125,17 +154,17 @@ export function DashboardHero({ hotelName, year, month }: DashboardHeroProps) {
             <>
               <div className="text-2xl font-bold">{formatCurrency(stats.revpar_cy)}</div>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                {stats.revpar_var >= 0 ? (
+                {stats.revpar_var && stats.revpar_var >= 0 ? (
                   <TrendingUp className="w-3 h-3 text-emerald-500" />
                 ) : (
                   <TrendingDown className="w-3 h-3 text-red-500" />
                 )}
-                <span className={stats.revpar_var >= 0 ? "text-emerald-500 font-medium" : "text-red-500 font-medium"}>
-                  {stats.revpar_var >= 0 ? "+" : ""}{formatCurrency(stats.revpar_var)}
+                <span className={stats.revpar_var && stats.revpar_var >= 0 ? "text-emerald-500 font-medium" : "text-red-500 font-medium"}>
+                  {stats.revpar_var && stats.revpar_var >= 0 ? "+" : ""}{formatCurrency(stats.revpar_var)}
                 </span>
                 {" "}from prior year ({formatCurrency(stats.revpar_py)})
               </p>
-              
+
               <div className="mt-4 border-t pt-4 flex justify-between items-center text-xs text-muted-foreground">
                 <span>Budget: {formatCurrency(stats.revpar_budget)}</span>
                 <span className="font-medium">
