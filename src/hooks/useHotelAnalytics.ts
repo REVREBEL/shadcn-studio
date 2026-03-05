@@ -24,6 +24,8 @@ export interface HotelSummaryStats {
   occ_var?: number | null;
   adr_var?: number | null;
   revpar_var?: number | null;
+  rooms_var?: number | null;
+  revenue_var?: number | null;
   rev_to_budget?: number | null;
   budget_reach_pct?: number | null;
 }
@@ -98,6 +100,10 @@ export function useHotelAnalytics() {
         conn = await db.connect();
 
         const parquetUrl = '/data/dashboard_current.parquet';
+        const internalPath = 'dashboard_current.parquet';
+
+        // Register the file URL so DuckDB can fetch it
+        await db.registerFileURL(internalPath, new URL(parquetUrl, window.location.origin).toString(), duckdb.DuckDBDataProtocol.HTTP, false);
 
         // Basic escaping of hotelName to mitigate simple string injection
         const escapedHotelName = hotelName.replace(/'/g, "''");
@@ -127,12 +133,20 @@ export function useHotelAnalytics() {
             (SUM(rooms_cy) / NULLIF(SUM(available_rooms), 0)) - (SUM(rooms_ly_actual) / NULLIF(SUM(available_rooms), 0)) as occ_var,
             (SUM(revenue_cy) / NULLIF(SUM(rooms_cy), 0)) - (SUM(rev_ly_actual) / NULLIF(SUM(rooms_ly_actual), 0)) as adr_var,
             (SUM(revenue_cy) / NULLIF(SUM(available_rooms), 0)) - (SUM(rev_ly_actual) / NULLIF(SUM(available_rooms), 0)) as revpar_var,
+            SUM(rooms_cy) - SUM(rooms_ly_actual) as rooms_var,
+            SUM(revenue_cy) - SUM(rev_ly_actual) as revenue_var,
             SUM(rev_budget) - SUM(revenue_cy) as rev_to_budget,
             SUM(revenue_cy) / NULLIF(SUM(rev_budget), 0) as budget_reach_pct
-          FROM read_parquet('${parquetUrl}')
+          FROM (
+            SELECT
+              *,
+              -- Robustly extract the date from both direct DATE and STRUCT types by using regex on the string representation
+              CAST(regexp_extract(stay_date::VARCHAR, '([0-9]{4}-[0-9]{2}-[0-9]{2})') AS DATE) as normalized_stay_date
+            FROM read_parquet('${internalPath}')
+          )
           WHERE property_name = '${escapedHotelName}'
-            AND date_part('year', stay_date) = ${Number(year)}
-            AND date_part('month', stay_date) = ${Number(month)}
+            AND date_part('year', normalized_stay_date) = ${Number(year)}
+            AND date_part('month', normalized_stay_date) = ${Number(month)}
           GROUP BY property_name;
         `;
 

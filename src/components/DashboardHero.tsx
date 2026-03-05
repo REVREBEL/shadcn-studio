@@ -61,40 +61,32 @@ export function DashboardHero({ hotelName, year, month }: DashboardHeroProps) {
     return new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 1 }).format(val);
   };
 
-  const getVarDisplay = (val: number | null | undefined) => {
+  // Variance display helper with robust null and zero handling
+  const renderVariance = (val: number | null | undefined, pyVal: number | null | undefined, type: 'currency' | 'percent') => {
     if (val === null || val === undefined) return null;
+
     const isPos = val >= 0;
     const Icon = isPos ? TrendingUp : TrendingDown;
     const colorClass = isPos ? "text-emerald-500 font-medium" : "text-red-500 font-medium";
     const iconColor = isPos ? "text-emerald-500" : "text-red-500";
 
+    const formattedVal = type === 'percent'
+      ? `${(val * 100).toFixed(1)}%`
+      : formatCurrency(Math.abs(val));
+
     return (
       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
         <Icon className={`w-3 h-3 ${iconColor}`} />
         <span className={colorClass}>
-          {isPos ? "+" : ""}{(val * 100).toFixed(1)}%
+          {isPos ? "+" : "-"}
+          {formattedVal}
         </span>
+        {pyVal !== undefined && pyVal !== null && (
+          <> from prior year ({type === 'percent' ? formatPct(pyVal) : formatCurrency(pyVal)})</>
+        )}
       </p>
     );
   };
-
-  const adrVarDisplay = (val: number | null | undefined, pyVal: number | null | undefined) => {
-    if (val === null || val === undefined) return null;
-    const isPos = val >= 0;
-    const Icon = isPos ? TrendingUp : TrendingDown;
-    const colorClass = isPos ? "text-emerald-500 font-medium" : "text-red-500 font-medium";
-    const iconColor = isPos ? "text-emerald-500" : "text-red-500";
-
-    return (
-      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-        <Icon className={`w-3 h-3 ${iconColor}`} />
-        <span className={colorClass}>
-          {isPos ? "+" : ""}{formatCurrency(val)}
-        </span>
-        {" "}from prior year ({formatCurrency(pyVal)})
-      </p>
-    );
-  }
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
@@ -110,10 +102,7 @@ export function DashboardHero({ hotelName, year, month }: DashboardHeroProps) {
           ) : stats ? (
             <>
               <div className="text-2xl font-bold">{formatPct(stats.occ_cy)}</div>
-              {getVarDisplay(stats.occ_var)}
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                Prior Year: {formatPct(stats.occ_py)}
-              </p>
+              {renderVariance(stats.occ_var, stats.occ_py, 'percent')}
             </>
           ) : (
             <div className="text-2xl font-bold">-</div>
@@ -133,7 +122,7 @@ export function DashboardHero({ hotelName, year, month }: DashboardHeroProps) {
           ) : stats ? (
             <>
               <div className="text-2xl font-bold">{formatCurrency(stats.adr_cy)}</div>
-              {adrVarDisplay(stats.adr_var, stats.adr_py)}
+              {renderVariance(stats.adr_var, stats.adr_py, 'currency')}
             </>
           ) : (
             <div className="text-2xl font-bold">-</div>
@@ -153,17 +142,7 @@ export function DashboardHero({ hotelName, year, month }: DashboardHeroProps) {
           ) : stats ? (
             <>
               <div className="text-2xl font-bold">{formatCurrency(stats.revpar_cy)}</div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                {stats.revpar_var && stats.revpar_var >= 0 ? (
-                  <TrendingUp className="w-3 h-3 text-emerald-500" />
-                ) : (
-                  <TrendingDown className="w-3 h-3 text-red-500" />
-                )}
-                <span className={stats.revpar_var && stats.revpar_var >= 0 ? "text-emerald-500 font-medium" : "text-red-500 font-medium"}>
-                  {stats.revpar_var && stats.revpar_var >= 0 ? "+" : ""}{formatCurrency(stats.revpar_var)}
-                </span>
-                {" "}from prior year ({formatCurrency(stats.revpar_py)})
-              </p>
+              {renderVariance(stats.revpar_var, stats.revpar_py, 'currency')}
 
               <div className="mt-4 border-t pt-4 flex justify-between items-center text-xs text-muted-foreground">
                 <span>Budget: {formatCurrency(stats.revpar_budget)}</span>
