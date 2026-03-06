@@ -18,6 +18,7 @@ import {
   Menu,
   PaletteIcon,
   PanelsLeftBottomIcon,
+  SquareTerminal,
   X
 } from 'lucide-react'
 import { useMedia } from 'react-use'
@@ -199,6 +200,10 @@ const AppSidebar = () => {
                 <SidebarMenuBadge className='bg-destructive/10 text-destructive static gap-0.5 rounded-full px-2 py-0.5 font-normal'>
                   <Flame className='size-4' /> Hot
                 </SidebarMenuBadge>
+              </CustomSidebarMenuItem>
+              <CustomSidebarMenuItem href='/shadcn-playground-tool'>
+                <SquareTerminal className='!size-5' />
+                Playground Tool
               </CustomSidebarMenuItem>
               <CustomSidebarMenuItem href='/blocks'>
                 <LayoutPanelTop className='!size-5' />
