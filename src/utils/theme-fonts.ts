@@ -16,7 +16,11 @@ const sansSerifFontNames = [
   'Source Code Pro',
   'Lato',
   'Gabriela',
-  'Delius Swash Caps'
+  'Delius Swash Caps',
+  'General Sans',
+  'Khand',
+  'Supreme',
+  'Barlow'
 ]
 
 const serifFontNames = [
@@ -31,7 +35,10 @@ const serifFontNames = [
   'Nunito',
   'Lato',
   'Gabriela',
-  'Delius Swash Caps'
+  'Delius Swash Caps',
+  'Pacifico',
+  'Supreme',
+  'General Sans'
 ]
 
 const monoFontNames = [
@@ -42,34 +49,41 @@ const monoFontNames = [
   'IBM Plex Mono',
   'Roboto Mono',
   'Space Mono',
-  'Delius Swash Caps'
+  'Delius Swash Caps',
+  'Fira Code',
+  'Supreme'
 ]
 
 export const fonts = {
   // Sans-serif fonts
-  Inter: 'Inter, sans-serif',
-  Roboto: 'Roboto, sans-serif',
+  'Inter': 'Inter, sans-serif',
+  'Roboto': 'Roboto, sans-serif',
   'Open Sans': 'Open Sans, sans-serif',
-  Poppins: 'Poppins, sans-serif',
-  Montserrat: 'Montserrat, sans-serif',
-  Outfit: 'Outfit, sans-serif',
+  'Poppins': 'Poppins, sans-serif',
+  'Montserrat': 'Montserrat, sans-serif',
+  'Outfit': 'Outfit, sans-serif',
   'Plus Jakarta Sans': 'Plus Jakarta Sans, sans-serif',
   'DM Sans': 'DM Sans, sans-serif',
   'IBM Plex Sans': 'IBM Plex Sans, sans-serif',
-  Nunito: 'Nunito, sans-serif',
-  Lato: 'Lato, sans-serif',
-  Geist: 'Geist, Geist Fallback, sans-serif',
+  'Nunito': 'Nunito, sans-serif',
+  'Lato': 'Lato, sans-serif',
+  'Geist': 'Geist, Geist Fallback, sans-serif',
+  'General Sans': 'General Sans, sans-serif',
+  'Khand': 'Khand, sans-serif',
+  'Supreme': 'Khand, sans-serif',
+  'Barlow': 'Khand, sans-serif',
 
   // Serif fonts
-  Merriweather: 'Merriweather, serif',
+  'Merriweather': 'Merriweather, serif',
   'Playfair Display': 'Playfair Display, serif',
-  Lora: 'Lora, serif',
+  'Lora': 'Lora, serif',
   'Source Serif 4': 'Source Serif 4, serif',
   'Libre Baskerville': 'Libre Baskerville, serif',
   'Space Grotesk': 'Space Grotesk, serif',
   'PT Serif': 'PT Serif, serif',
-  Gabriela: 'Gabriela, Geist Fallback',
+  'Gabriela': 'Gabriela, Geist Fallback',
   'Delius Swash Caps': 'Delius Swash Caps, serif',
+  'Pacifico': 'Pacifico, cursive',
 
   // Monospace fonts
   'JetBrains Mono': 'JetBrains Mono, monospace',
@@ -78,8 +92,10 @@ export const fonts = {
   'Geist Mono': 'Geist Mono, Geist Mono Fallback, monospace',
   'IBM Plex Mono': 'IBM Plex Mono, monospace',
   'Roboto Mono': 'Roboto Mono, monospace',
-  'Space Mono': 'Space Mono, monospace'
+  'Space Mono': 'Space Mono, monospace',
+  'Logic Monoscript': 'Logic Monoscript, monospace'
 }
+
 
 export const sansSerifFonts = Object.fromEntries(
   Object.entries(fonts).filter(([key]) => sansSerifFontNames.includes(key))
@@ -99,3 +115,4 @@ export const getAppliedThemeFont = (
 
   return key ? key : null
 }
+
