@@ -50,10 +50,19 @@ async function runQueryToParquet(db: duckdb.Database, bq: BigQuery, query: strin
     fs.mkdirSync(publicDataDir, { recursive: true });
   }
 
-  // Handle BigQuery's Date formats automatically
-  const jsonND = rows.map(r => JSON.stringify(r)).join('\n');
+  // Handle BigQuery's Date formats automatically (BigQuery DATE objects stringify to {value: '...'})
+  const jsonND = rows.map(r => {
+    const row = { ...r } as any;
+    for (const key in row) {
+      // Flatten BigQuery Date/Datetime/Timestamp objects
+      if (row[key] && typeof row[key] === 'object' && 'value' in row[key]) {
+        row[key] = row[key].value;
+      }
+    }
+    return JSON.stringify(row);
+  }).join('\n');
   fs.writeFileSync(tempJsonPath, jsonND);
-  
+
   console.log(`Converting data to ${outputFilename} via DuckDB...`);
 
   return new Promise<void>((resolve, reject) => {
@@ -63,7 +72,7 @@ async function runQueryToParquet(db: duckdb.Database, bq: BigQuery, query: strin
       ) TO '${outputPath}' (FORMAT PARQUET);
     `, (err: any) => {
       if (fs.existsSync(tempJsonPath)) fs.unlinkSync(tempJsonPath);
-      
+
       if (err) {
         console.error(`Error generating ${outputFilename}:`, err);
         reject(err);
@@ -81,7 +90,7 @@ async function syncData() {
   // 1. Current Snapshot Query for KPI Dashboards
   const currentQuery = `
     WITH seg_totals AS (
-      SELECT 
+      SELECT
         property_name,
         stay_date,
         SUM(rooms_otb) as rooms_otb,
@@ -95,7 +104,7 @@ async function syncData() {
       GROUP BY property_name, stay_date
     ),
     cap_totals AS (
-      SELECT 
+      SELECT
         property_name,
         stay_date,
         SUM(available_rooms) as available_rooms
@@ -106,7 +115,7 @@ async function syncData() {
     SELECT
       seg_totals.property_name,
       seg_totals.stay_date,
-      
+
       seg_totals.rooms_otb as rooms_cy,
       seg_totals.rev_otb as revenue_cy,
       seg_totals.rooms_ly_actual as rooms_ly_actual,
@@ -114,7 +123,7 @@ async function syncData() {
       seg_totals.rev_budget as rev_budget,
       seg_totals.rooms_budget as rooms_budget,
       cap_totals.available_rooms as available_rooms,
-      
+
       -- Calculated Metrics
       (seg_totals.rooms_otb / nullif(cap_totals.available_rooms, 0)) as occ_cy,
       (seg_totals.rooms_ly_actual / nullif(cap_totals.available_rooms, 0)) as occ_py,
@@ -125,7 +134,7 @@ async function syncData() {
       (seg_totals.rev_otb / nullif(cap_totals.available_rooms, 0)) as revpar_cy,
       (seg_totals.rev_ly_actual / nullif(cap_totals.available_rooms, 0)) as revpar_py,
       (seg_totals.rev_budget / nullif(cap_totals.available_rooms, 0)) as revpar_budget,
-      
+
       -- Variances
       ((seg_totals.rooms_otb / nullif(cap_totals.available_rooms, 0)) - (seg_totals.rooms_ly_actual / nullif(cap_totals.available_rooms, 0))) as occ_var,
       ((seg_totals.rev_otb / nullif(seg_totals.rooms_otb, 0)) - (seg_totals.rev_ly_actual / nullif(seg_totals.rooms_ly_actual, 0))) as adr_var,
@@ -140,15 +149,15 @@ async function syncData() {
       (seg_totals.rev_budget - seg_totals.rev_otb) as rev_to_budget,
       (seg_totals.rev_otb / nullif(seg_totals.rev_budget, 0)) as budget_reach_pct
     FROM seg_totals
-    LEFT JOIN cap_totals 
-      ON seg_totals.property_name = cap_totals.property_name 
+    LEFT JOIN cap_totals
+      ON seg_totals.property_name = cap_totals.property_name
       AND seg_totals.stay_date = cap_totals.stay_date;
   `;
 
   // 2. Trend Snapshot Query for Historically Paced Data
   const trendQuery = `
     WITH seg_totals AS (
-      SELECT 
+      SELECT
         property_name,
         snapshot_date,
         stay_date,
@@ -164,7 +173,7 @@ async function syncData() {
       GROUP BY property_name, stay_date, snapshot_date
     ),
     cap_totals AS (
-      SELECT 
+      SELECT
         property_name,
         snapshot_date,
         stay_date,
@@ -178,7 +187,7 @@ async function syncData() {
       seg_totals.property_name,
       seg_totals.snapshot_date,
       seg_totals.stay_date,
-      
+
       seg_totals.rooms_otb as rooms_cy,
       seg_totals.rev_otb as revenue_cy,
       seg_totals.rooms_ly_actual as rooms_ly_actual,
@@ -186,7 +195,7 @@ async function syncData() {
       seg_totals.rev_budget as rev_budget,
       seg_totals.rooms_budget as rooms_budget,
       cap_totals.available_rooms as available_rooms,
-      
+
       -- Calculated Metrics
       (seg_totals.rooms_otb / nullif(cap_totals.available_rooms, 0)) as occ_cy,
       (seg_totals.rooms_ly_actual / nullif(cap_totals.available_rooms, 0)) as occ_py,
@@ -198,8 +207,8 @@ async function syncData() {
       (seg_totals.rev_ly_actual / nullif(cap_totals.available_rooms, 0)) as revpar_py,
       (seg_totals.rev_budget / nullif(cap_totals.available_rooms, 0)) as revpar_budget
     FROM seg_totals
-    LEFT JOIN cap_totals 
-      ON seg_totals.property_name = cap_totals.property_name 
+    LEFT JOIN cap_totals
+      ON seg_totals.property_name = cap_totals.property_name
       AND seg_totals.stay_date = cap_totals.stay_date
       AND seg_totals.snapshot_date = cap_totals.snapshot_date;
   `;
