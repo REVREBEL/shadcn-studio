@@ -93,6 +93,13 @@
   --shadow-lg: 4px 4px 0px 0px oklch(0.34 0.09 258.52 / 1.00), 4px 4px 6px -1px oklch(0.34 0.09 258.52 / 1.00);
   --shadow-xl: 4px 4px 0px 0px oklch(0.34 0.09 258.52 / 1.00), 4px 8px 10px -1px oklch(0.34 0.09 258.52 / 1.00);
   --shadow-2xl: 4px 4px 0px 0px oklch(0.34 0.09 258.52 / 2.50);
+  --destructive-foreground: var(--color-red-700);
+  --info: var(--color-blue-500);
+  --info-foreground: var(--color-blue-700);
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-700);
+  --warning: var(--color-amber-500);
+  --warning-foreground: var(--color-amber-700);
 
 }
 
@@ -160,8 +167,6 @@
   --color-9-inverse-fade: color-mix(in srgb, var(--color-9-inverse) 80%, white 20%);
   --color-9-inverse: #163666;
 
-
-
   --sidebar: oklch(0 0 0);
   --sidebar-foreground: oklch(1.00 0 0);
   --sidebar-primary: oklch(0.55 0.21 31.81);
@@ -190,7 +195,21 @@
     text-decoration: var(--shiki-dark-text-decoration) !important;
     --shiki-dark-bg: transparent !important;
   }
-}
+
+  --destructive-foreground: var(--color-red-400)
+;
+
+  --info: var(--color-blue-500);
+
+  --info-foreground: var(--color-blue-400);
+
+  --success: var(--color-emerald-500);
+
+  --success-foreground: var(--color-emerald-400);
+
+  --warning: var(--color-amber-500);
+
+  --warning-foreground: var(--color-amber-400)}
 
 @theme inline {
   --font-kalam: var(--font-kalam);
@@ -230,8 +249,6 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-
-
   /* Computed Shadow Variants */
   --shadow-2xs: var(--shadow-2xs);
   --shadow-xs: var(--shadow-xs);
@@ -252,6 +269,13 @@
 
   --animate-rainbow: rainbow var(--speed, 2s) infinite linear;
   --animate-heartbeat: heartbeat 2s infinite ease-in-out;
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning: var(--warning);
+  --color-success-foreground: var(--success-foreground);
+  --color-success: var(--success);
+  --color-info-foreground: var(--info-foreground);
+  --color-info: var(--info);
 
   @keyframes rainbow {
     0% {
@@ -280,7 +304,6 @@
     }
   }
 }
-
 
 body {
   letter-spacing: var(--letter-spacing);
@@ -313,7 +336,6 @@ body {
     scrollbar-color: var(--border) transparent;
   }
 }
-
 
 @layer components {
 
@@ -363,7 +385,6 @@ body {
     color: var(--color-9-inverse);
     box-shadow: .5px .5px 0 var(--color-9-inverse), 1px 1px 0 var(--color-9-inverse), 1.5px 1.5px 0 var(--color-9-inverse), 2px 2px 0 var(--color-9-inverse), 2.5px 2.5px 0 var(--color-9-inverse), 3px 3px 0 var(--color-9-inverse), 3.5px 3.5px 0 var(--color-9-inverse), 4px 4px 0 var(--color-9-inverse), 4.5px 4.5px 0 var(--color-9-inverse), 5px 5px 0 var(--color-9-inverse), 5.5px 5.5px 0 var(--color-9-inverse)
   }
-
 
   .bg-color-primary {
     background-color: var(--primary);
@@ -442,7 +463,6 @@ body {
     cursor: auto;
     pointer-events: auto
   }
-
 
   .tag.is-color-1 {
     background-color: var(---color-1);

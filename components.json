@@ -10,19 +10,19 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
-    "hooks": "@/hooks",
-    "lib": "@/lib",
     "utils": "@/lib/utils",
-    "ui": "@/components/ui"
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
   },
   "registries": {
     "@shadcn-studio": "https://shadcnstudio.com/r/{name}.json",
     "@ss-components": "https://shadcnstudio.com/r/components/{name}.json",
     "@ss-blocks": "https://shadcnstudio.com/r/blocks/{name}.json",
-    "@ss-themes": "https://shadcnstudio.com/r/themes/{name}.json"
-  },
-  "iconLibrary": "lucide"
+    "@ss-themes": "https://shadcnstudio.com/r/themes/{name}.json",
+    "@coss": "https://coss.com/ui/r/{name}.json"
+  }
 }
-
