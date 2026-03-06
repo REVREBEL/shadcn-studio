@@ -22,6 +22,14 @@ const NavMenu = () => {
         Theme Generator
       </Link>
       <Link
+        href='/shadcn-playground-tool'
+        className={cn('text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm', {
+          'text-primary hover:text-primary/80 font-medium': pathname.startsWith('/shadcn-playground-tool')
+        })}
+      >
+        Playground Tool
+      </Link>
+      <Link
         href='/docs/getting-started/introduction'
         className={cn('text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm', {
           'text-primary hover:text-primary/80 font-medium': pathname.startsWith('/docs/getting-started/introduction')
