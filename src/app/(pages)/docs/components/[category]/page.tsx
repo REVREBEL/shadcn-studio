@@ -2,6 +2,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import React, { Suspense } from "react";
+import dynamic from "next/dynamic";
 
 // Third-party Imports
 import { InfoIcon } from 'lucide-react'
@@ -23,6 +25,14 @@ import { categories, getCategory } from '@/config/components'
 // Util Imports
 import { getCachedFileTree, getCachedComponentItem, getComponentsByNames } from '@/utils/components'
 import { cn } from '@/lib/utils'
+
+
+// swap layout is a client side component, since it uses local storage for this demo.
+// In production you might want to save the layout order on server via api call
+const SwapLayout = dynamic(() => import("@/components/swap-layout"), {
+  ssr: false,
+  loading: () => <SwapLayoutLoader />,
+});
 
 type Props = {
   params: Promise<{ category: string }>

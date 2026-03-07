@@ -317,7 +317,7 @@ async function buildBundles() {
   writeFileSync(
     join(OUT_DIR, "next-link.js"),
     [
-      'import React from "react";',
+      ''use client';\nimport React from "react";',
       "const Link = React.forwardRef(function Link(props, ref) {",
       "  const { href, children, ...rest } = props;",
       '  return React.createElement("a", { ...rest, href, ref }, children);',
@@ -333,7 +333,7 @@ async function buildBundles() {
   writeFileSync(
     join(OUT_DIR, "next-image.js"),
     [
-      'import React from "react";',
+      ''use client';\nimport React from "react";',
       "const Image = React.forwardRef(function Image(props, ref) {",
       "  const { src, alt = \"\", width, height, ...rest } = props;",
       "  const resolvedSrc = typeof src === \"string\" ? src : src?.src ?? \"\";",

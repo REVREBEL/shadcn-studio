@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 
 import { cn } from "@/lib/utils";
@@ -11,8 +12,21 @@ const Popover = PopoverPrimitive.Root;
 function PopoverTrigger({
   className,
   children,
+  asChild = false,
   ...props
-}: PopoverPrimitive.Trigger.Props) {
+}: PopoverPrimitive.Trigger.Props & { asChild?: boolean }) {
+  if (asChild && React.isValidElement(children)) {
+    return (
+      <PopoverPrimitive.Trigger
+        className={className}
+        data-slot="popover-trigger"
+        nativeButton={false}
+        render={children}
+        {...props}
+      />
+    );
+  }
+
   return (
     <PopoverPrimitive.Trigger
       className={className}

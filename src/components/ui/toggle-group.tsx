@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group'
 import { type VariantProps } from 'class-variance-authority'
 
@@ -62,6 +61,9 @@ function ToggleGroupItem({
       data-variant={context.variant || variant}
       data-size={context.size || size}
       data-spacing={context.spacing}
+      // ADD asChild={props.asChild} to allow parent components like TooltipTrigger 
+      // to take control of the element rendering
+      asChild={props.asChild} 
       className={cn(
         toggleVariants({
           variant: context.variant || variant,

@@ -84,7 +84,7 @@ ${preloadTags}
 <div id="root"></div>
 <div id="__error"><div id="__error-content"></div></div>
 <script type="module">
-import React from "react";
+'use client';\nimport React from "react";
 import { createRoot } from "react-dom/client";
 import { Tooltip as RadixTooltip } from "radix-ui";
 
